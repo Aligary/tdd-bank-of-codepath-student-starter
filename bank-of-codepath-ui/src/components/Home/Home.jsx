@@ -8,9 +8,7 @@ import axios from "axios"
 
 export default function Home(props) {
 
-  
-
-  useEffect(async() => {
+  async function getTransactions() {
     props.setIsLoading(true)
     
     try{
@@ -18,28 +16,34 @@ export default function Home(props) {
       if(res.data.transactions) {
         props.setTransactions(res.data.transactions)
       }
+      else
+        throw "error"
     } 
     catch(err) {
       props.setError(err)
     }
     props.setIsLoading(false)
+  }
 
-  }, [])
-
-  useEffect(async() => {
+  async function getTransfers() {
     props.setIsLoading(true)
     try{
       const res = await axios.get("http://localhost:3001/bank/transfers")
       if(res.data.transfers) {
         props.setTransfers(res.data.transfers)
       }
+      else
+        throw "error"
     } 
     catch(err) {
       props.setError(err)
     }
     props.setIsLoading(false)
+  }
 
-  }, [])
+  useEffect(() => {getTransactions()}, [])
+
+  useEffect(() => {getTransfers()}, [])
 
   let filteredTransactions = []
 
@@ -77,6 +81,7 @@ export default function Home(props) {
         </div>
     )
   }
+
   return (
     <div className="home">
       <AddTransaction 
@@ -89,7 +94,9 @@ export default function Home(props) {
       {
       props.isLoading 
       ? <h1>Loading...</h1> 
-      : <BankActivity transactions={filteredTransactions}
+      : <BankActivity 
+          transactions={filteredTransactions}
+          transfers={props.transfers}
         />
       }
       {
